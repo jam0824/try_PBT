@@ -29,10 +29,12 @@
 from pbt import is_valid_name
 
 # 有効な名前
-print(is_valid_name("たなか"))     # True
-print(is_valid_name("タナカ"))     # True
-print(is_valid_name("たーち"))     # True
+print(is_valid_name("たなか"))     # True（ひらがなのみ）
+print(is_valid_name("タナカ"))     # True（カタカナのみ）
+print(is_valid_name("たーち"))     # True（長音記号含む）
 print(is_valid_name("づけ"))       # True（濁点含む）
+print(is_valid_name("あいうエオ"))  # True（ひらがな・カタカナ混在）
+print(is_valid_name("カタかな"))   # True（カタカナ・ひらがな混在）
 
 # 無効な名前
 print(is_valid_name("田中"))       # False（漢字）
@@ -68,16 +70,21 @@ pytest test_pbt.py -s
 
 ### Property-Based Testing について
 
-このプロジェクトでは、以下の2つの property-based test を実装しています：
+このプロジェクトでは、以下の3つの property-based test を実装しています：
 
 1. **`test_name_validation_logs`**
-   - 任意のUnicode文字列を入力として使用
-   - 日本語以外の文字が含まれている場合は必ず失敗することを確認
-   - 各文字のUnicode詳細をログ出力
+   - 任意のUnicode文字列（1文字以上）を入力として使用
+   - 不正な文字が含まれている場合は必ず失敗し、有効な文字のみの場合は成功することを確認
+   - 包括的な文字列検証を行う
 
 2. **`test_name_validation_accepts_valid_japanese`**
-   - 有効な日本語文字のみで構成された文字列を生成
+   - ひらがなのみ、またはカタカナのみで構成された文字列を生成
    - 生成された文字列が必ず検証を通過することを確認
+
+3. **`test_name_validation_accepts_mixed_japanese`**
+   - ひらがな、カタカナ、長音記号が混在した文字列を生成
+   - 混在した文字列でも必ず検証を通過することを確認
+   - 現実的なキャラクター名パターンをテスト
 
 ### テスト例
 
@@ -87,6 +94,12 @@ pytest test_pbt.py::test_name_validation_logs -s
 
 # 特定のテストのみ実行
 pytest test_pbt.py::test_name_validation_accepts_valid_japanese -v
+
+# 混在テストのみ実行
+pytest test_pbt.py::test_name_validation_accepts_mixed_japanese -v
+
+# 全テストを詳細出力で実行
+pytest test_pbt.py -v
 ```
 
 ## 技術的な詳細
